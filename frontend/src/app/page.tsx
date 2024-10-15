@@ -15,6 +15,7 @@ export default function Home() {
           Cryptography Project - Secure Messaging Protocol
         </h5>
         <div className="font-normal text-gray-700 dark:text-gray-400">
+
           <ul className="my-10">
             <li>Coria Martinez, Gustavo</li>
             <li>García Lemus, Rocío</li>

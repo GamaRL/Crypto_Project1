@@ -19,13 +19,5 @@ const config: Config = {
   plugins: [
     flowbite.plugin()
   ],
-  images: {
-    localPatterns: [
-      {
-        pathname: '/assets/images/**',
-        search: '',
-      },
-    ],
-  }
 };
 export default config;

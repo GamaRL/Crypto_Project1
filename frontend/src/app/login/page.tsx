@@ -60,7 +60,7 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center h-screen">
       <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-        <form className="space-y-6" action="#">
+        <form className="space-y-6" autoComplete="off">
           <h5 className="text-xl font-medium text-gray-900 dark:text-white">Proyecto 1 - Criptografía</h5>
           <div>
             <Label htmlFor="username" value="Username" />
