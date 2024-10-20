@@ -31,7 +31,7 @@ export default function KeyGeneration() {
   const onGenerate = () => {
     exportKeys(password)
     .then(keys => {
-      console.log(keys.privateKeyPEM);
+      console.log(keys.privateKeyPEM)
       
       console.log(keys.publicKeyPEM)
     })
