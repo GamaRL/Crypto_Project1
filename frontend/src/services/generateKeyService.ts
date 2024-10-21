@@ -1,57 +1,38 @@
-/*export async function generateSymmetricKeyFromPassword(password: string): Promise<CryptoKey> {
+export async function generateSymmetricKeyFromPassword(password: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
-  window.crypto.subtle.importKey(
+
+  // Define a fixed salt (must be consistent)
+  const fixedSalt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]); // Example salt
+  const iterations = 100000; // Number of iterations
+  const hashAlgorithm = "SHA-256"; // Hash algorithm to use
+
+  // Import the password as a raw key
+  const keyMaterial = await window.crypto.subtle.importKey(
     "raw",
     enc.encode(password),
     "PBKDF2",
     false,
-    ["deriveBits", "deriveKey"],
+    ["deriveBits", "deriveKey"]
   );
-  return await window.crypto.subtle.generateKey(
+
+  // Derive the key using PBKDF2 with the fixed salt
+  const derivedKey = await window.crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: fixedSalt, // Use the same fixed salt
+      iterations: iterations,
+      hash: hashAlgorithm
+    },
+    keyMaterial,
     {
       name: "AES-GCM",
-      length: 256, // 256-bit key
+      length: 256 // 256-bit key
     },
-    false, // Extractable
-    ["encrypt", "decrypt"]
+    false, // Not extractable
+    ["encrypt", "decrypt"] // Usages
   );
-}*/
 
-export async function generateSymmetricKeyFromPassword(password: string): Promise<CryptoKey> {
-    const enc = new TextEncoder();
-
-    // Define a fixed salt (must be consistent)
-    const fixedSalt = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]); // Example salt
-    const iterations = 100000; // Number of iterations
-    const hashAlgorithm = "SHA-256"; // Hash algorithm to use
-
-    // Import the password as a raw key
-    const keyMaterial = await window.crypto.subtle.importKey(
-        "raw",
-        enc.encode(password),
-        "PBKDF2",
-        false,
-        ["deriveBits", "deriveKey"]
-    );
-
-    // Derive the key using PBKDF2 with the fixed salt
-    const derivedKey = await window.crypto.subtle.deriveKey(
-        {
-            name: "PBKDF2",
-            salt: fixedSalt, // Use the same fixed salt
-            iterations: iterations,
-            hash: hashAlgorithm
-        },
-        keyMaterial,
-        {
-            name: "AES-GCM",
-            length: 256 // 256-bit key
-        },
-        false, // Not extractable
-        ["encrypt", "decrypt"] // Usages
-    );
-
-    return derivedKey;
+  return derivedKey;
 }
 
 async function encryptPrivateKey(privateKey: CryptoKey, symmetricKey: CryptoKey): Promise<ArrayBuffer> {
@@ -129,7 +110,7 @@ async function generateKeyPair(): Promise<CryptoKeyPair> {
   return keyPair;
 }
 
-async function exportPublicKey(key: CryptoKey): Promise<ArrayBuffer> {
+export async function exportPublicKey(key: CryptoKey): Promise<ArrayBuffer> {
   return await window.crypto.subtle.exportKey("spki", key);
 }
 
@@ -141,8 +122,8 @@ function bufferToBase64(buffer: ArrayBuffer): string {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 }
 
-function toPEM(buffer: ArrayBuffer, type: string): string {
-  
+export function toPEM(buffer: ArrayBuffer, type: string): string {
+
   const base64 = bufferToBase64(buffer);
   return `-----BEGIN ${type}-----\n` +
     base64.match(/.{1,64}/g)?.join('\n') +
@@ -166,32 +147,32 @@ export function fromPEM(pem: string): ArrayBuffer {
   return buffer;
 }
 
-async function encryptData(publicKey : CryptoKey, data : string) {
-    const encoder = new TextEncoder();
-    const encodedData = encoder.encode(data);
+async function encryptData(publicKey: CryptoKey, data: string) {
+  const encoder = new TextEncoder();
+  const encodedData = encoder.encode(data);
 
-    const encryptedData = await window.crypto.subtle.encrypt(
-        {
-            name: "RSA-OAEP", // Same algorithm used for key generation
-        },
-        publicKey, // Public key for encryption
-        encodedData // Data to encrypt
-    );
+  const encryptedData = await window.crypto.subtle.encrypt(
+    {
+      name: "RSA-OAEP", // Same algorithm used for key generation
+    },
+    publicKey, // Public key for encryption
+    encodedData // Data to encrypt
+  );
 
-    return encryptedData; // Return as Uint8Array
+  return encryptedData; // Return as Uint8Array
 }
 
-async function decryptData(privateKey : CryptoKey, encryptedData : ArrayBuffer) {
-    const decryptedData = await window.crypto.subtle.decrypt(
-        {
-            name: "RSA-OAEP", // Same algorithm used for key generation
-        },
-        privateKey, // Private key for decryption
-        encryptedData // Data to decrypt
-    );
+async function decryptData(privateKey: CryptoKey, encryptedData: ArrayBuffer) {
+  const decryptedData = await window.crypto.subtle.decrypt(
+    {
+      name: "RSA-OAEP", // Same algorithm used for key generation
+    },
+    privateKey, // Private key for decryption
+    encryptedData // Data to decrypt
+  );
 
-    const decoder = new TextDecoder();
-    return decoder.decode(decryptedData); // Convert ArrayBuffer to string
+  const decoder = new TextDecoder();
+  return decoder.decode(decryptedData); // Convert ArrayBuffer to string
 }
 
 interface KeyPairResponse {
@@ -199,7 +180,7 @@ interface KeyPairResponse {
   privateKeyPEM: string
 }
 
-export async function importKeys(privateKeyPEM: string, publicKeyPEM: string, key: CryptoKey) : Promise<CryptoKeyPair> {
+export async function importKeys(privateKeyPEM: string, publicKeyPEM: string, key: CryptoKey): Promise<CryptoKeyPair> {
 
   // Verifying data
   const pubKeyFromPEM = await importPublicKey(fromPEM(publicKeyPEM));
@@ -207,8 +188,7 @@ export async function importKeys(privateKeyPEM: string, publicKeyPEM: string, ke
   const encryptedPrivKeyFromPEM = fromPEM(privateKeyPEM);
   const privKeyFromPEM = await decryptPrivateKey(encryptedPrivKeyFromPEM, key);
 
-  if (await decryptData(privKeyFromPEM, await encryptData(pubKeyFromPEM, "__")) === "__")
-  {
+  if (await decryptData(privKeyFromPEM, await encryptData(pubKeyFromPEM, "__")) === "__") {
     return {
       privateKey: privKeyFromPEM,
       publicKey: pubKeyFromPEM

@@ -19,7 +19,18 @@ export default function Home() {
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
   const router = useRouter()
-  const {setCredentials} = useContext(AppContext)
+  const {credentials, setCredentials} = useContext(AppContext)
+
+
+  if (credentials.username !== '' || credentials.publicKey !== null || credentials.privateKey !== null) {
+    router.push('/login')
+
+    return (
+      <div>
+        <p>Not allowed</p>
+      </div>
+    )
+  }
 
   const handleChangeName = (event: ChangeEvent<HTMLInputElement>) => {
     const input = event.target.value || '';

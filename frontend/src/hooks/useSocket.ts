@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { AppContext } from "@/context/AppContextProvider";
+import { useCallback, useContext, useEffect, useState } from "react";
 import * as io from "socket.io-client";
 
-export const useSocket = (username: string) => {
+/*export const useSocket = () => {
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
+  const {connectedUsers, setConnectedUsers} = useContext(AppContext);
+  const [username, setUsername] = useState('');
   const [socketResponse, setSocketResponse] = useState({
     content: "",
     username: "",
@@ -23,6 +26,10 @@ export const useSocket = (username: string) => {
   );
   useEffect(() => {
     const SOCKET_BASE_URL = 'http://127.0.0.1:8086/'
+
+    if (username === '')
+      return
+
     const s = io.connect(SOCKET_BASE_URL, {
       reconnection: false,
       transports: ["websocket", "polling"],
@@ -40,11 +47,12 @@ export const useSocket = (username: string) => {
 
     s.on("connect_error", (err: any) => {
       console.log("connection error due to...")
-      console.log(err)
+      console.error(err)
     });
 
-    s.emit('show_connections', {},(response: string[]) => {
+    s.emit('show_connections', {}, (response: {username: string, sessionId: string}[]) => {
        console.log(response)
+       setConnectedUsers(response)
     })
 
     s.on("read_message", (res: any) => {
@@ -62,5 +70,7 @@ export const useSocket = (username: string) => {
     };
   }, []);
 
-  return { socketResponse, isConnected, sendData };
-};
+  return { socket, setSocket };
+
+  //return { socketResponse, isConnected, sendData, setUsername };
+};*/
