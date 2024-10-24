@@ -1,4 +1,6 @@
-import { generateSymmetricKeyFromPassword } from "./keyGenerationService";
+import { decryptSecret, encryptSecret } from "./encryptionService";
+import { generateKeyPair, generateSymmetricKeyFromPassword } from "./keyGenerationService";
+import { fromPEM, toPEM } from "./utilities";
 
 interface KeyPairResponse {
   publicKeyPEM: string,
@@ -14,35 +16,6 @@ export interface SignAndEncryptKeyCollection {
 
 export async function exportPublicKey(key: CryptoKey): Promise<ArrayBuffer> {
   return await window.crypto.subtle.exportKey("spki", key);
-}
-
-export function bufferToBase64(buffer: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-}
-
-export function toPEM(buffer: ArrayBuffer, type: string): string {
-
-  const base64 = bufferToBase64(buffer);
-  return `-----BEGIN ${type}-----\n` +
-    base64.match(/.{1,64}/g)?.join('\n') +
-    `\n-----END ${type}-----`;
-}
-
-export function fromPEM(pem: string): ArrayBuffer {
-  // Remove the PEM header and footer
-  const pemContent = pem.replace(/-----BEGIN.*-----|-----END.*-----|\s+/g, '');
-
-  // Decode the base64 content into binary
-  const binary = atob(pemContent);
-
-  // Convert the binary string into an ArrayBuffer
-  const buffer = new ArrayBuffer(binary.length);
-  const view = new Uint8Array(buffer);
-  for (let i = 0; i < binary.length; i++) {
-    view[i] = binary.charCodeAt(i);
-  }
-
-  return buffer;
 }
 
 async function encryptPrivateKey(privateKey: CryptoKey, symmetricKey: CryptoKey): Promise<ArrayBuffer> {
@@ -138,50 +111,6 @@ export async function importPublicKey(keyBuffer: ArrayBuffer): Promise<Pick<Sign
 
 }
 
-async function generateKeyPair(): Promise<CryptoKeyPair> {
-  const keyPair = await window.crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 2048,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
-    true, // Whether the key is extractable
-    ["encrypt", "decrypt"] // Key usages
-  );
-  return keyPair;
-}
-
-
-async function encryptData(publicKey: CryptoKey, data: string) {
-  const encoder = new TextEncoder();
-  const encodedData = encoder.encode(data);
-
-  const encryptedData = await window.crypto.subtle.encrypt(
-    {
-      name: "RSA-OAEP", // Same algorithm used for key generation
-    },
-    publicKey, // Public key for encryption
-    encodedData // Data to encrypt
-  );
-
-  return encryptedData; // Return as Uint8Array
-}
-
-async function decryptData(privateKey: CryptoKey, encryptedData: ArrayBuffer) {
-  const decryptedData = await window.crypto.subtle.decrypt(
-    {
-      name: "RSA-OAEP", // Same algorithm used for key generation
-    },
-    privateKey, // Private key for decryption
-    encryptedData // Data to decrypt
-  );
-
-  const decoder = new TextDecoder();
-  return decoder.decode(decryptedData); // Convert ArrayBuffer to string
-}
-
-
 export async function importKeys(privateKeyPEM: string, publicKeyPEM: string, key: CryptoKey): Promise<SignAndEncryptKeyCollection> {
 
   // Verifying data
@@ -190,7 +119,7 @@ export async function importKeys(privateKeyPEM: string, publicKeyPEM: string, ke
   const encryptedPrivKeyFromPEM = fromPEM(privateKeyPEM);
   const privKeyPairFromPEM = await decryptPrivateKey(encryptedPrivKeyFromPEM, key);
 
-  if (await decryptData(privKeyPairFromPEM.decryptsPrivateKey, await encryptData(pubKeyPairFromPEM.encryptPublicKey, "__")) === "__") {
+  if (await decryptSecret(await encryptSecret("__", pubKeyPairFromPEM.encryptPublicKey ), privKeyPairFromPEM.decryptsPrivateKey) === "__") {
     return {
       ...pubKeyPairFromPEM,
       ...privKeyPairFromPEM,
@@ -200,7 +129,7 @@ export async function importKeys(privateKeyPEM: string, publicKeyPEM: string, ke
   throw new Error("Keys are incorrect!");
 }
 
-export default async function exportKeys(password: string): Promise<KeyPairResponse> {
+export async function exportKeys(password: string): Promise<KeyPairResponse> {
 
   const keyPair = await generateKeyPair();
   const symmetricKey = await generateSymmetricKeyFromPassword(password);

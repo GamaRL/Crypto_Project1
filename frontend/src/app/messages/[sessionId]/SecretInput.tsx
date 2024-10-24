@@ -2,7 +2,7 @@
 
 import { AppContext } from "@/context/AppContextProvider";
 import { SignAndEncryptKeyCollection } from "@/services/keyExtractionService";
-import { encryptSecret } from "@/services/keyGenerationService";
+import { encryptSecret } from "@/services/encryptionService";
 import { Button, Label, TextInput } from "flowbite-react";
 import { ChangeEvent, MouseEventHandler, useContext, useState } from "react";
 import { HiKey } from "react-icons/hi";

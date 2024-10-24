@@ -1,5 +1,3 @@
-import { bufferToBase64, exportPublicKey, fromPEM, toPEM } from "./keyExtractionService";
-
 export async function generateSymmetricKeyFromPassword(password: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
 
@@ -37,34 +35,16 @@ export async function generateSymmetricKeyFromPassword(password: string): Promis
   return derivedKey;
 }
 
-export async function encryptSecret(secret: string, publicKey: CryptoKey): Promise<string> {
-  const textEncoder = new TextEncoder();
-  const encoded = textEncoder.encode(secret)
-
-  const response = await window.crypto.subtle.encrypt(
+export async function generateKeyPair(): Promise<CryptoKeyPair> {
+  const keyPair = await window.crypto.subtle.generateKey(
     {
       name: "RSA-OAEP",
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
     },
-    publicKey,
-    encoded,
+    true, // Whether the key is extractable
+    ["encrypt", "decrypt"] // Key usages
   );
-
-  return bufferToBase64(response);
-}
-
-export async function decryptSecret(encodedSecretBase64: string, privateKey: CryptoKey) {
-
-  const encryptedSecret = Buffer.from(encodedSecretBase64, 'base64').buffer;
-
-  const decryptedSecret = await window.crypto.subtle.decrypt(
-    {
-      name: "RSA-OAEP",
-    },
-    privateKey,
-    encryptedSecret,
-  );
-
-
-  const decoder = new TextDecoder();
-  return decoder.decode(decryptedSecret); // Convert ArrayBuffer to string
+  return keyPair;
 }

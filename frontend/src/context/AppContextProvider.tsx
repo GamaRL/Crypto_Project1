@@ -1,9 +1,10 @@
 "use client"
 
-import { exportPublicKey, fromPEM, importPublicKey, SignAndEncryptKeyCollection, toPEM } from "@/services/keyExtractionService";
-import { decryptSecret } from "@/services/keyGenerationService";
+import { exportPublicKey, importPublicKey, SignAndEncryptKeyCollection } from "@/services/keyExtractionService";
+import { decryptSecret } from "@/services/encryptionService";
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
 import io from "socket.io-client";
+import { fromPEM, toPEM } from "@/services/utilities";
 
 interface Credentials {
   username: string,

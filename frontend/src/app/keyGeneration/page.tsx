@@ -1,11 +1,10 @@
 "use client"
 
-import exportKeys from "@/services/keyGenerationService";
+import { exportKeys } from "@/services/keyExtractionService";
 import { Button, TextInput } from "flowbite-react";
 import { Label } from "flowbite-react/components/Label";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { ChangeEvent, MouseEventHandler, useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 export default function KeyGeneration() {
 
