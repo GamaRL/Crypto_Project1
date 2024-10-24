@@ -5,8 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import Sidebar from "../Sidebar";
 import SecretInput from "./SecretInput";
-import { Alert, Button } from "flowbite-react";
-import { HiInformationCircle } from "react-icons/hi";
 import RequestKeyAlert from "./RequestKeyAlert";
 
 
@@ -19,7 +17,7 @@ export default function Home() {
   const userData = connectedUsers.find(u => u.sessionId === params.sessionId);
 
 
-  if (credentials.username === '' || !credentials.publicKey || !credentials.privateKey) {
+  if (credentials.username === '' || !credentials.keys === null) {
     router.push('/login')
 
     return <div>
@@ -45,7 +43,7 @@ export default function Home() {
                 </h1>
               </div>
               <RequestKeyAlert sessionId={params.sessionId}/>
-              <SecretInput />
+              <SecretInput sessionId={params.sessionId} />
               
             </main>
             :

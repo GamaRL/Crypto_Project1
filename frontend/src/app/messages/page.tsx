@@ -13,7 +13,7 @@ export default function Home() {
   console.log(credentials);
 
 
-  if (credentials.username === '' || !credentials.publicKey || !credentials.privateKey) {
+  if (credentials.username === '' || credentials.keys === null) {
     router.push('/login')
 
     return <div>

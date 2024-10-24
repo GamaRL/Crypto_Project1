@@ -1,6 +1,6 @@
 "use client"
 
-import exportKeys from "@/services/generateKeyService";
+import exportKeys from "@/services/keyGenerationService";
 import { Button, TextInput } from "flowbite-react";
 import { Label } from "flowbite-react/components/Label";
 import Link from "next/link";

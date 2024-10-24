@@ -1,13 +1,13 @@
 "use client"
 
-import { exportPublicKey, fromPEM, importPublicKey, toPEM } from "@/services/generateKeyService";
+import { exportPublicKey, fromPEM, importPublicKey, SignAndEncryptKeyCollection, toPEM } from "@/services/keyExtractionService";
+import { decryptSecret } from "@/services/keyGenerationService";
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
 import io from "socket.io-client";
 
 interface Credentials {
   username: string,
-  privateKey: CryptoKey | null,
-  publicKey: CryptoKey | null
+  keys: SignAndEncryptKeyCollection | null
 }
 
 interface AppContextType {
@@ -15,8 +15,10 @@ interface AppContextType {
   setCredentials: Dispatch<SetStateAction<Credentials>>,
   connectedUsers: ConnectedUser[],
   setConnectedUsers: Dispatch<SetStateAction<ConnectedUser[]>>,
-  socket : SocketIOClient.Socket|null,
-  cryptoKeys: Object
+  socket: SocketIOClient.Socket | null,
+  cryptoKeys: Object,
+  sessionKeys: Object
+  setSessionKeys: Dispatch<SetStateAction<Object>>,
 }
 
 interface ConnectedUser {
@@ -27,29 +29,27 @@ interface ConnectedUser {
 export const AppContext = createContext<AppContextType>({
   credentials: {
     username: '',
-    privateKey: null,
-    publicKey: null
+    keys: null,
   },
   setCredentials: () => { },
   connectedUsers: [],
   setConnectedUsers: () => { },
   socket: null,
-  cryptoKeys: {}
+  cryptoKeys: {},
+  sessionKeys: {},
+  setSessionKeys: () => { },
 })
 
 const AppContextProvider = (props: any) => {
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
   const [cryptoKeys, setCryptoKeys] = useState<Object>({});
-  const [socket, setSocket] = useState<SocketIOClient.Socket|null>(null);
+  const [sessionKeys, setSessionKeys] = useState<Object>({});
+  const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
 
   const [credentials, setCredentials] = useState<Credentials>({
     username: '',
-    privateKey: null,
-    publicKey: null
+    keys: null,
   });
-
-  console.log(cryptoKeys);
-  
 
   useEffect(() => {
 
@@ -59,7 +59,7 @@ const AppContextProvider = (props: any) => {
       return
 
     const s = io.connect(SOCKET_BASE_URL, {
-      reconnection: false,
+      reconnection: true,
       transports: ["websocket", "polling"],
       query: {
         username: credentials.username
@@ -70,32 +70,40 @@ const AppContextProvider = (props: any) => {
     s.on("connect", () => {
       console.log("connected")
 
-      s.emit('show_connections', {}, (response: {username: string, sessionId: string}[]) => {
+      s.emit('show_connections', {}, (response: { username: string, sessionId: string }[]) => {
         console.log(response)
         setConnectedUsers(response)
       })
 
-      s.on("add_user", (user: {username: string, sessionId: string}) => {
+      s.on("add_user", (user: { username: string, sessionId: string }) => {
         setConnectedUsers([...connectedUsers, user])
       })
 
       s.on("remove_user", (sessionId: string) => {
         setConnectedUsers(connectedUsers.filter(u => u.sessionId !== sessionId))
+        // TODO: Remove users' public key (if exists)
       })
 
       s.on("request_public_key", async (data: string) => {
-        if (credentials.publicKey) {
-          
-          const key = toPEM(await exportPublicKey(credentials.publicKey), 'PUBLIC');
-          s.emit("response_public_key", {sessionId: data, publicKey: key})
+        if (credentials.keys?.encryptPublicKey) {
+
+          const key = toPEM(await exportPublicKey(credentials.keys.encryptPublicKey), 'PUBLIC');
+          s.emit("response_public_key", { sessionId: data, publicKey: key })
 
         }
       })
 
-      s.on("response_public_key", async (data: {sessionId: string, publicKey: string}) => {
-          
-          const key = await importPublicKey(fromPEM(data.publicKey))
-          setCryptoKeys({...cryptoKeys, [data.sessionId]: key})
+      s.on("response_public_key", async (data: { sessionId: string, publicKey: string }) => {
+        const key = await importPublicKey(fromPEM(data.publicKey))
+        setCryptoKeys({ ...cryptoKeys, [data.sessionId]: key })
+      })
+
+      s.on("receive_secret_session_key", async (data: { sessionId: string, key: string }) => {
+        if (credentials.keys?.decryptsPrivateKey) {
+          const secret = await decryptSecret(data.key, credentials.keys?.decryptsPrivateKey)
+          setSessionKeys({ ...sessionKeys, [data.sessionId]: secret })
+          console.log(secret);
+        }
       })
 
     });
@@ -115,7 +123,7 @@ const AppContextProvider = (props: any) => {
   }, [credentials.username])
 
   return (
-    <AppContext.Provider value={{ credentials, setCredentials, connectedUsers, setConnectedUsers, socket, cryptoKeys }}>
+    <AppContext.Provider value={{ credentials, setCredentials, connectedUsers, setConnectedUsers, socket, cryptoKeys, sessionKeys, setSessionKeys }}>
       {props.children}
     </AppContext.Provider>
   );

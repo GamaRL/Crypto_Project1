@@ -1,7 +1,8 @@
 "use client"
 
 import { AppContext } from "@/context/AppContextProvider";
-import { generateSymmetricKeyFromPassword, importKeys, importPublicKey } from "@/services/generateKeyService";
+import { importKeys } from "@/services/keyExtractionService";
+import { generateSymmetricKeyFromPassword } from "@/services/keyGenerationService";
 import { Button, TextInput } from "flowbite-react";
 import { FileInput } from "flowbite-react/components/FileInput";
 import { Label } from "flowbite-react/components/Label";
@@ -22,8 +23,8 @@ export default function Home() {
   const {credentials, setCredentials} = useContext(AppContext)
 
 
-  if (credentials.username !== '' || credentials.publicKey !== null || credentials.privateKey !== null) {
-    router.push('/login')
+  if (credentials.username !== '' || credentials.keys !== null) {
+    router.push('/messages')
 
     return (
       <div>
@@ -90,9 +91,9 @@ export default function Home() {
       }
 
       const symmetricKey = await generateSymmetricKeyFromPassword(password);
-      const keyPair = await importKeys(privKey, pubKey, symmetricKey);
+      const keyCollection = await importKeys(privKey, pubKey, symmetricKey);
 
-      console.log(keyPair);
+      console.log(keyCollection);
 
       setTimeout(() => {
         router.push('/messages')
@@ -100,13 +101,15 @@ export default function Home() {
 
       setDisabled(true);
       setSuccess('Welcome');
+
       setCredentials({
         username,
-        publicKey: keyPair.publicKey,
-        privateKey: keyPair.privateKey
+        keys: keyCollection,
       })
 
     } catch (err) {
+      console.error(err);
+      
       setError('An error ocurred with the provided keys');
     }
   }

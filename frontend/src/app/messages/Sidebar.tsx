@@ -9,7 +9,7 @@ import { HiUser } from "react-icons/hi";
 export default function Component() {
   const {connectedUsers, credentials} = useContext(AppContext)
   return (
-    <Sidebar aria-label="Default sidebar example" className="h-screen">
+    <Sidebar className="h-screen w-1/4">
       <Link href={'/'} passHref legacyBehavior>
         <Sidebar.Logo href="#" img="/images/live-chat.png" imgAlt="--">
           Connected Users

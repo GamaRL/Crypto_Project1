@@ -23,22 +23,22 @@ function AlertContent(props: {onClick: MouseEventHandler<HTMLButtonElement>}) {
   );
 }
 
-export default function RequestKey(data: {sessionId: string}) {
+export default function RequestKey(props: {sessionId: string}) {
 
   const { socket, cryptoKeys } = useContext(AppContext);
 
   const handleButton : MouseEventHandler<HTMLButtonElement> = (event) => {
-    socket?.emit('request_public_key', data.sessionId)
+    socket?.emit('request_public_key', props.sessionId)
   }
 
-  if (!cryptoKeys.hasOwnProperty(data.sessionId))
-  return (
-    <div>
-      <Alert color="warning" icon={HiInformationCircle} additionalContent={<AlertContent onClick={handleButton}/>}>
-        <span className="font-medium">You don't have his user public key!</span>
-      </Alert>
-    </div>
-  )
+  if (!cryptoKeys.hasOwnProperty(props.sessionId))
+    return (
+      <div>
+        <Alert color="warning" icon={HiInformationCircle} additionalContent={<AlertContent onClick={handleButton}/>}>
+          <span className="font-medium">You don't have his user public key!</span>
+        </Alert>
+      </div>
+    )
 
   return <></>
 }

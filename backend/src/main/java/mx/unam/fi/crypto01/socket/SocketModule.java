@@ -13,9 +13,10 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 
 import lombok.extern.slf4j.Slf4j;
 import mx.unam.fi.crypto01.requests.PublicKeyMessage;
+import mx.unam.fi.crypto01.requests.RequestSecretSessionKey;
+import mx.unam.fi.crypto01.requests.SendSecretSessionKey;
 import mx.unam.fi.crypto01.responses.ConnectedUser;
 import mx.unam.fi.crypto01.responses.PublicKeyResponse;
-import mx.unam.fi.crypto01.service.SocketService;
 import mx.unam.fi.crypto01.service.UserService;
 
 @Component
@@ -23,18 +24,17 @@ import mx.unam.fi.crypto01.service.UserService;
 public class SocketModule {
 
   private final SocketIOServer server;
-  private final SocketService socketService;
   private final UserService userService;
 
-  public SocketModule(SocketIOServer server, SocketService socketService, UserService userService) {
+  public SocketModule(SocketIOServer server, UserService userService) {
     this.server = server;
-    this.socketService = socketService;
     this.userService = userService;
     server.addConnectListener(this.onConnected());
     server.addDisconnectListener(this.onDisconnected());
     server.addEventListener("show_connections", Void.class, this.onShowConnections());
     server.addEventListener("request_public_key", String.class, this.onRequestPublicKey());
     server.addEventListener("response_public_key", PublicKeyMessage.class, this.onResponsePublicKey());
+    server.addEventListener("send_secret_session_key", RequestSecretSessionKey.class, this.onSendSecretSessionKey());
   }
 
 	private ConnectListener onConnected() {
@@ -77,12 +77,24 @@ public class SocketModule {
     };
   }
 
-  private DataListener<PublicKeyMessage> onResponsePublicKey() {
+  private DataListener<RequestSecretSessionKey> onSendSecretSessionKey() {
 
     return (client, data, ackSender) -> {
       SocketIOClient receiver = server.getClient(UUID.fromString(data.getSessionId()));
 
-      log.info("Payload: {}", data);
+      var sendSecretKey = SendSecretSessionKey.builder()
+        .key(data.getKey())
+        .sessionId(client.getSessionId().toString())
+        .build();
+
+      receiver.sendEvent("receive_secret_session_key", sendSecretKey);
+    };
+  }
+
+  private DataListener<PublicKeyMessage> onResponsePublicKey() {
+
+    return (client, data, ackSender) -> {
+      SocketIOClient receiver = server.getClient(UUID.fromString(data.getSessionId()));
 
       var response = PublicKeyResponse.builder()
         .publicKey(data.getPublicKey())
