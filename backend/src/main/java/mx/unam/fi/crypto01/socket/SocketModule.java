@@ -14,6 +14,7 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import lombok.extern.slf4j.Slf4j;
 import mx.unam.fi.crypto01.requests.PublicKeyMessage;
 import mx.unam.fi.crypto01.requests.RequestSecretSessionKey;
+import mx.unam.fi.crypto01.requests.SendMessage;
 import mx.unam.fi.crypto01.requests.SendSecretSessionKey;
 import mx.unam.fi.crypto01.responses.ConnectedUser;
 import mx.unam.fi.crypto01.responses.PublicKeyResponse;
@@ -35,6 +36,7 @@ public class SocketModule {
     server.addEventListener("request_public_key", String.class, this.onRequestPublicKey());
     server.addEventListener("response_public_key", PublicKeyMessage.class, this.onResponsePublicKey());
     server.addEventListener("send_secret_session_key", RequestSecretSessionKey.class, this.onSendSecretSessionKey());
+    server.addEventListener("send_message", SendMessage.class, this.onSendMessage());
   }
 
 	private ConnectListener onConnected() {
@@ -88,6 +90,18 @@ public class SocketModule {
         .build();
 
       receiver.sendEvent("receive_secret_session_key", sendSecretKey);
+    };
+  }
+
+  private DataListener<SendMessage> onSendMessage() {
+
+    return (client, message, ackSender) -> {
+      var sessionId = UUID.fromString(message.getReceiver());
+      SocketIOClient receiver = server.getClient(sessionId);
+
+      log.info("{}", message);
+
+      receiver.sendEvent("receive_message", message);
     };
   }
 

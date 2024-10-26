@@ -54,7 +54,7 @@ async function decryptPrivateKey(encryptedData: ArrayBuffer, symmetricKey: Crypt
   );
 
   // Import the decrypted private key back to CryptoKey
-  
+
   const keyPair = {
     decryptsPrivateKey: await window.crypto.subtle.importKey(
       "pkcs8",
