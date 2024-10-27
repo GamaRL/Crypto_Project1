@@ -6,6 +6,7 @@ import { createContext, Dispatch, SetStateAction, useEffect, useState } from "re
 import io from "socket.io-client";
 import { fromPEM, toPEM } from "@/services/utilities";
 import { generateSymmetricKeyFromPassword } from "@/services/keyGenerationService";
+import { verifyMessage } from "@/services/signService";
 
 interface Credentials {
   username: string,
@@ -16,6 +17,7 @@ export interface Message {
   sender: string,
   receiver: string,
   content: string,
+  signature: string,
   date: string
 }
 
@@ -29,6 +31,7 @@ interface AppContextType {
   sessionKeys: Object,
   setSessionKeys: Dispatch<SetStateAction<Object>>,
   sessionMessages: Object,
+  setSessionMessages: Dispatch<SetStateAction<Object>>,
 }
 
 interface ConnectedUser {
@@ -49,6 +52,7 @@ export const AppContext = createContext<AppContextType>({
   sessionKeys: {},
   setSessionKeys: () => { },
   sessionMessages: {},
+  setSessionMessages: () => { }
 })
 
 const AppContextProvider = (props: any) => {
@@ -155,15 +159,22 @@ const AppContextProvider = (props: any) => {
       console.log(sessionKeys);
 
 
-      if (sessionKeys.hasOwnProperty(data.sender)) {
+      if (sessionKeys.hasOwnProperty(data.sender) && credentials.keys) {
 
         const sessionSecret = sessionKeys[data.sender as keyof typeof sessionKeys] as unknown as string;
         const messages = sessionMessages.hasOwnProperty(data.sender) ? sessionMessages[data.sender as keyof typeof sessionMessages] as unknown as Message[] : [];
+        const userKeys = cryptoKeys[data.sender as keyof typeof cryptoKeys] as unknown as Pick<SignAndEncryptKeyCollection, "encryptPublicKey" | "verifyPublicKey">
 
         const symmetricKey = await generateSymmetricKeyFromPassword(sessionSecret);
 
         const decryptedMessage = await decryptMessage(data.content, symmetricKey);
-        data.content = decryptedMessage;
+
+        if (await verifyMessage(data.signature, decryptedMessage, userKeys.verifyPublicKey)) {
+          data.content = decryptedMessage;
+        } else {
+          data.content = "[This message is dangerous]";
+        }
+
 
         console.log(data);
         console.log(messages);
@@ -174,12 +185,10 @@ const AppContextProvider = (props: any) => {
       }
     })
 
-
-
-  }, [socket, sessionKeys, sessionMessages])
+  }, [socket, cryptoKeys, sessionKeys, sessionMessages])
 
   return (
-    <AppContext.Provider value={{ credentials, setCredentials, connectedUsers, setConnectedUsers, socket, cryptoKeys, sessionKeys, setSessionKeys, sessionMessages }}>
+    <AppContext.Provider value={{ credentials, setCredentials, connectedUsers, setConnectedUsers, socket, cryptoKeys, sessionKeys, setSessionKeys, sessionMessages, setSessionMessages }}>
       {props.children}
     </AppContext.Provider>
   );

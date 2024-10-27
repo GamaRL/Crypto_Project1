@@ -1,7 +1,5 @@
 package mx.unam.fi.crypto01.requests;
 
-import java.time.LocalDate;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +14,5 @@ public class SendMessage {
   private String receiver;
   private String date;
   private String content;
+  private String signature;
 }

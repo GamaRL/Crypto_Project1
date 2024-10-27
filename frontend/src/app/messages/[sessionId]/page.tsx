@@ -1,6 +1,6 @@
 "use client";
 
-import { AppContext } from "@/context/AppContextProvider";
+import { AppContext, Message } from "@/context/AppContextProvider";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import Sidebar from "../Sidebar";
@@ -19,8 +19,10 @@ export default function Home() {
   const userData = connectedUsers.find(u => u.sessionId === params.sessionId);
 
   console.log(sessionMessages);
-  
 
+  const messages = sessionMessages.hasOwnProperty(params.sessionId)
+    ? sessionMessages[params.sessionId as keyof typeof sessionMessages] as unknown as Message[]
+    : [];
 
   if (credentials.username === '' || !credentials.keys === null) {
     router.push('/login')
@@ -50,8 +52,13 @@ export default function Home() {
               <RequestKeyAlert sessionId={params.sessionId}/>
               <SecretInput sessionId={params.sessionId} />
 
-              <div className="container flex flex-column bg-red-500 p-10 mt-10 mb-5 max-h-md h-full">
-                <MessageBubble/>
+              <div className="flex flex-col bg-gray-500 p-10 mt-10 mb-5 max-h-96 overflow-y-auto">
+                {
+                  messages.map(m => {
+
+                    return <MessageBubble message={m}/>
+                  })
+                }
               </div>
               <div>
                 <MessageInput sessionId={params.sessionId}/>
