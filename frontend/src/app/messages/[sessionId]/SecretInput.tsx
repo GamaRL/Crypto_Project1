@@ -7,13 +7,14 @@ import { Button, Label, TextInput } from "flowbite-react";
 import { ChangeEvent, MouseEventHandler, useContext, useState } from "react";
 import { HiKey } from "react-icons/hi";
 
-export default function SecretInput(props: {sessionId: string}) {
+export default function SecretInput(props: { sessionId: string }) {
 
   const { socket, cryptoKeys, sessionKeys, setSessionKeys } = useContext(AppContext);
   const [secret, setSecret] = useState<string>("");
   const [enabled, setEnabled] = useState<boolean>(false);
   const [visibleSecret, setVisibleSecret] = useState<boolean>(false);
 
+  const canStartInput = cryptoKeys.hasOwnProperty(props.sessionId);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newSecret = event.target.value
@@ -21,8 +22,8 @@ export default function SecretInput(props: {sessionId: string}) {
     setEnabled(newSecret !== '')
   }
 
-  const onSubmit : MouseEventHandler = async (e) => {
-    
+  const onSubmit: MouseEventHandler = async (e) => {
+
     if (cryptoKeys.hasOwnProperty(props.sessionId)) {
 
       const keys = cryptoKeys[props.sessionId as keyof typeof cryptoKeys] as unknown as Pick<SignAndEncryptKeyCollection, "encryptPublicKey" | "verifyPublicKey">
@@ -37,7 +38,7 @@ export default function SecretInput(props: {sessionId: string}) {
     }
   }
 
-  const toggleVisibility : MouseEventHandler = async (e) => {
+  const toggleVisibility: MouseEventHandler = async (e) => {
     setVisibleSecret(!visibleSecret)
   }
 
@@ -54,12 +55,12 @@ export default function SecretInput(props: {sessionId: string}) {
             type={visibleSecret ? 'text' : 'password'}
             icon={HiKey}
             value={sessionSecret}
-            disabled/>
+            disabled />
         </div>
         <div className="h-full">
           <Button type="button" onClick={toggleVisibility}>
             {
-            visibleSecret ?  'Hide' : 'Show'
+              visibleSecret ? 'Hide' : 'Show'
             }
           </Button>
         </div>
@@ -79,12 +80,14 @@ export default function SecretInput(props: {sessionId: string}) {
           icon={HiKey}
           placeholder="Insert the key"
           value={secret}
-          onChange={handleChange}/>
+          onChange={handleChange}
+          disabled={!canStartInput}
+          />
       </div>
       <div className="h-full">
         <Button type="button" color="gray" onClick={toggleVisibility}>
           {
-            visibleSecret ?  'Hide' : 'Show'
+            visibleSecret ? 'Hide' : 'Show'
           }
         </Button>
       </div>

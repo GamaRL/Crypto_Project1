@@ -14,11 +14,9 @@ export default function Home() {
   const { credentials, connectedUsers, sessionMessages } = useContext(AppContext);
   const router = useRouter()
   const params = useParams<{ sessionId: string }>();
+
   const isConnected = connectedUsers.some(u => u.sessionId === params.sessionId);
-
   const userData = connectedUsers.find(u => u.sessionId === params.sessionId);
-
-  console.log(sessionMessages);
 
   const messages = sessionMessages.hasOwnProperty(params.sessionId)
     ? sessionMessages[params.sessionId as keyof typeof sessionMessages] as unknown as Message[]
@@ -54,10 +52,15 @@ export default function Home() {
 
               <div className="flex flex-col bg-gray-500 p-10 mt-10 mb-5 max-h-96 overflow-y-auto">
                 {
-                  messages.map(m => {
+                  messages.length > 0
+                  ?
+                    messages.map(m => {
 
-                    return <MessageBubble message={m}/>
-                  })
+                      return <MessageBubble message={m}/>
+                    })
+                  :
+                  <div className="text-center text-gray-400 text-xl">No messages in this conversation</div>
+
                 }
               </div>
               <div>

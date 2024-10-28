@@ -155,9 +155,6 @@ const AppContextProvider = (props: any) => {
     })
 
     socket.on("receive_message", async (data: Message) => {
-      console.log(data.sender);
-      console.log(sessionKeys);
-
 
       if (sessionKeys.hasOwnProperty(data.sender) && credentials.keys) {
 

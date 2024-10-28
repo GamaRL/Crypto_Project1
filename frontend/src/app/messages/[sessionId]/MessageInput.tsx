@@ -10,9 +10,11 @@ import { signMessage } from "@/services/signService";
 
 export default function MessageInput(props: {sessionId: string}) {
 
-  const { credentials, socket, sessionKeys, sessionMessages, setSessionMessages } = useContext(AppContext);
+  const { credentials, socket, cryptoKeys, sessionKeys, sessionMessages, setSessionMessages } = useContext(AppContext);
   const [messageContent, setMessage] = useState<string>("");
   const [enabled, setEnabled] = useState<boolean>(false);
+
+  const canStartInput = cryptoKeys.hasOwnProperty(props.sessionId) && sessionKeys.hasOwnProperty(props.sessionId);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newSecret = event.target.value
@@ -59,10 +61,11 @@ export default function MessageInput(props: {sessionId: string}) {
           icon={HiMail}
           placeholder="Insert the Message"
           value={messageContent}
-          onChange={handleChange}/>
+          onChange={handleChange}
+          disabled={!canStartInput}/>
       </div>
       <div className="ml-5">
-        <Button className="rounded-full h-10 w-10" type="button" onClick={onSubmit}>
+        <Button className="rounded-full h-10 w-10" type="button" onClick={onSubmit} disabled={!canStartInput}>
           <HiArrowNarrowRight/>
         </Button>
       </div>
