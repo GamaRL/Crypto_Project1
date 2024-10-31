@@ -22,7 +22,7 @@ export default function MessageInput(props: {sessionId: string}) {
     setEnabled(newSecret !== '')
   }
 
-  const onSubmit : MouseEventHandler = async (e) => {
+  const onSubmit : MouseEventHandler = async () => {
     
     if (sessionKeys.hasOwnProperty(props.sessionId) && credentials.keys) {
       const sessionKey = sessionKeys[props.sessionId as keyof typeof sessionKeys] as unknown as string;
@@ -65,7 +65,7 @@ export default function MessageInput(props: {sessionId: string}) {
           disabled={!canStartInput}/>
       </div>
       <div className="ml-5">
-        <Button className="rounded-full h-10 w-10" type="button" onClick={onSubmit} disabled={!canStartInput}>
+        <Button className="rounded-full h-10 w-10" type="button" onClick={onSubmit} disabled={!enabled && !canStartInput}>
           <HiArrowNarrowRight/>
         </Button>
       </div>

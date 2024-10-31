@@ -2,12 +2,13 @@
 
 import { AppContext, Message } from "@/context/AppContextProvider";
 import { useParams, useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import Sidebar from "../Sidebar";
 import SecretInput from "./SecretInput";
 import RequestKeyAlert from "./RequestKeyAlert";
 import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
+import { Spinner } from "flowbite-react";
 
 
 export default function Home() {
@@ -25,9 +26,12 @@ export default function Home() {
   if (credentials.username === '' || !credentials.keys === null) {
     router.push('/login')
 
-    return <div>
-      Not allowed
-    </div>
+    return <main className="flex h-screen justify-center">
+      <div className="flex flex-wrap items-center gap-2">
+        <Spinner aria-label="Small spinner example" size="sm" />
+        <p>Not allowed, redirecting to login</p>
+      </div>
+    </main>
   }
 
   if (!isConnected)
@@ -56,7 +60,7 @@ export default function Home() {
                   ?
                     messages.map(m => {
 
-                      return <MessageBubble message={m}/>
+                      return <MessageBubble message={m} key={m.signature}/>
                     })
                   :
                   <div className="text-center text-gray-400 text-xl">No messages in this conversation</div>
@@ -69,9 +73,12 @@ export default function Home() {
               
             </main>
             :
-            <div>
-              Connection lost :(
-            </div>
+            <main className="flex h-screen justify-center">
+              <div className="flex flex-wrap items-center gap-2">
+                <Spinner aria-label="Small spinner example" size="sm" />
+                <p>Connection lost for this chat</p>
+              </div>
+            </main>
         }
 
 

@@ -2,7 +2,7 @@
 
 import localFont from "next/font/local";
 import "./globals.css";
-import { DarkThemeToggle, Flowbite } from "flowbite-react";
+import { Flowbite } from "flowbite-react";
 import AppContextProvider from "@/context/AppContextProvider";
 
 const geistSans = localFont({

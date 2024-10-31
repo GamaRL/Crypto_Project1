@@ -3,7 +3,7 @@
 import { AppContext } from "@/context/AppContextProvider";
 import { exportPublicKey } from "@/services/keyExtractionService";
 import { toPEM } from "@/services/utilities";
-import { Alert, Button, ButtonGroup } from "flowbite-react";
+import { Alert, Button } from "flowbite-react";
 import { MouseEventHandler, useContext } from "react";
 import { HiInformationCircle } from "react-icons/hi";
 
@@ -29,7 +29,7 @@ export default function RequestKey(props: {sessionId: string}) {
 
   const { socket, cryptoKeys, credentials } = useContext(AppContext);
 
-  const handleButton : MouseEventHandler<HTMLButtonElement> = async (event) => {
+  const handleButton : MouseEventHandler<HTMLButtonElement> = async () => {
     socket?.emit('request_public_key', props.sessionId)
     
     if (credentials.keys) {
@@ -45,7 +45,7 @@ export default function RequestKey(props: {sessionId: string}) {
     return (
       <div>
         <Alert color="warning" icon={HiInformationCircle} additionalContent={<AlertContent onClick={handleButton}/>}>
-          <span className="font-medium">You don't have his user public key!</span>
+          <span className="font-medium">You don&apos;t have his user public key!</span>
         </Alert>
       </div>
     )

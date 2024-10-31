@@ -22,7 +22,7 @@ export default function SecretInput(props: { sessionId: string }) {
     setEnabled(newSecret !== '')
   }
 
-  const onSubmit: MouseEventHandler = async (e) => {
+  const onSubmit: MouseEventHandler = async () => {
 
     if (cryptoKeys.hasOwnProperty(props.sessionId)) {
 
@@ -38,7 +38,7 @@ export default function SecretInput(props: { sessionId: string }) {
     }
   }
 
-  const toggleVisibility: MouseEventHandler = async (e) => {
+  const toggleVisibility: MouseEventHandler = async () => {
     setVisibleSecret(!visibleSecret)
   }
 

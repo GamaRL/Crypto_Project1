@@ -14,7 +14,7 @@ export default function Component() {
         </h2>
       </div>
       <div>
-        <h5 className="mb-1 text-base font-semibold text-white text-center">Don't you know how to start?</h5>
+        <h5 className="mb-1 text-base font-semibold text-white text-center">Don&apos;t you know how to start?</h5>
         <p className="flex items-center text-sm font-normal text-gray-400 text-center">
           Please select a chat with connected users
         </p>

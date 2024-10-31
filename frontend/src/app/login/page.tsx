@@ -144,7 +144,7 @@ export default function Home() {
           </div>
           <Button className="w-full" size="sm" color="blue" type="submit" disabled={disabled}>Login to your account</Button>
           <div className="text-sm font-medium text-gray-500 dark:text-gray-300">
-            Don't you have keys? <Link href="/keyGeneration" className="text-blue-700 hover:underline dark:text-blue-500">Generate keys</Link>
+            Don&apos;t you have keys? <Link href="/keyGeneration" className="text-blue-700 hover:underline dark:text-blue-500">Generate keys</Link>
           </div>
         </form>
       </div>

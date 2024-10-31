@@ -27,7 +27,7 @@ export default function Component() {
           {
             connectedUsers.map(u => {
               return (
-                <Link href={`/messages/${u.sessionId}`} passHref legacyBehavior>
+                <Link href={`/messages/${u.sessionId}`} passHref legacyBehavior key={u.sessionId}>
                   <Sidebar.Item href="#" icon={HiUser} id={u.sessionId}>
                     {u.username}
                   </Sidebar.Item>

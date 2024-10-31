@@ -2,7 +2,7 @@
 
 import { exportPublicKey, importPublicKey, SignAndEncryptKeyCollection } from "@/services/keyExtractionService";
 import { decryptMessage, decryptSecret } from "@/services/encryptionService";
-import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { createContext, Dispatch, FC, ReactNode, SetStateAction, useEffect, useState } from "react";
 import io from "socket.io-client";
 import { fromPEM, toPEM } from "@/services/utilities";
 import { generateSymmetricKeyFromPassword } from "@/services/keyGenerationService";
@@ -27,11 +27,11 @@ interface AppContextType {
   connectedUsers: ConnectedUser[],
   setConnectedUsers: Dispatch<SetStateAction<ConnectedUser[]>>,
   socket: SocketIOClient.Socket | null,
-  cryptoKeys: Object,
-  sessionKeys: Object,
-  setSessionKeys: Dispatch<SetStateAction<Object>>,
-  sessionMessages: Object,
-  setSessionMessages: Dispatch<SetStateAction<Object>>,
+  cryptoKeys: object,
+  sessionKeys: object,
+  setSessionKeys: Dispatch<SetStateAction<object>>,
+  sessionMessages: object,
+  setSessionMessages: Dispatch<SetStateAction<object>>,
 }
 
 interface ConnectedUser {
@@ -55,28 +55,35 @@ export const AppContext = createContext<AppContextType>({
   setSessionMessages: () => { }
 })
 
-const AppContextProvider = (props: any) => {
+interface AppContextProviderProps {
+  children: ReactNode;
+}
+
+const SOCKET_BASE_URL = process.env.NEXT_PUBLIC_SOCKET_BASE_URL || 'http://127.0.0.1:8086';
+
+const AppContextProvider : FC<AppContextProviderProps> = (props) => {
+
+
   const [connectedUsers, setConnectedUsers] = useState<ConnectedUser[]>([]);
-  const [cryptoKeys, setCryptoKeys] = useState<Object>({});
-  const [sessionKeys, setSessionKeys] = useState<Object>({});
-  const [sessionMessages, setSessionMessages] = useState<Object>({});
+  const [cryptoKeys, setCryptoKeys] = useState<object>({});
+  const [sessionKeys, setSessionKeys] = useState<object>({});
+  const [sessionMessages, setSessionMessages] = useState<object>({});
   const [socket, setSocket] = useState<SocketIOClient.Socket | null>(null);
+
 
   const [credentials, setCredentials] = useState<Credentials>({
     username: '',
     keys: null,
   });
 
-  useEffect(() => {
+  console.log(SOCKET_BASE_URL);
 
-    const SOCKET_BASE_URL = 'http://127.0.0.1:8086/'
-    let s;
+  useEffect(() => {
 
     if (credentials.username === '')
       return
 
-
-    s = io.connect(SOCKET_BASE_URL, {
+    const s = io.connect(SOCKET_BASE_URL, {
       reconnection: true,
       transports: ["websocket", "polling"],
       query: {
@@ -94,7 +101,7 @@ const AppContextProvider = (props: any) => {
       })
     })
 
-    s.on("connect_error", (err: any) => {
+    s.on("connect_error", (err: Error) => {
       console.log("connection error due to...")
       console.error(err)
     });
@@ -131,7 +138,7 @@ const AppContextProvider = (props: any) => {
     return () => {
       s.disconnect();
     };
-  }, [credentials.username])
+  }, [credentials])
 
   useEffect(() => {
 
@@ -172,9 +179,6 @@ const AppContextProvider = (props: any) => {
           data.content = "[This message is dangerous]";
         }
 
-
-        console.log(data);
-        console.log(messages);
         setSessionMessages(prevSessionMessages => ({
           ...prevSessionMessages,
           [data.sender]: [...messages, data]
