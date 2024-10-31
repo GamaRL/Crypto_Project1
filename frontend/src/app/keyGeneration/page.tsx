@@ -11,7 +11,7 @@ export default function KeyGeneration() {
   const [password, setPassword] = useState<string>('');
   const [disabled, setDisabled] = useState<boolean>(true);
 
-  // Function to download a file
+  // Function to download a file given a filename and its content
   function downloadFile(filename: string, content: string): void {
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -30,9 +30,8 @@ export default function KeyGeneration() {
   const onGenerate = () => {
     exportKeys(password)
     .then(keys => {
-      console.log(keys.privateKeyPEM)
-      
-      console.log(keys.publicKeyPEM)
+      downloadFile('public.pem', keys.privateKeyPEM)
+      downloadFile('private.key', keys.publicKeyPEM)
     })
   }
 

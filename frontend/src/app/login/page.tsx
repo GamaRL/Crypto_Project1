@@ -3,7 +3,7 @@
 import { AppContext } from "@/context/AppContextProvider";
 import { importKeys } from "@/services/keyExtractionService";
 import { generateSymmetricKeyFromPassword } from "@/services/keyGenerationService";
-import { Button, TextInput } from "flowbite-react";
+import { Button, Spinner, TextInput } from "flowbite-react";
 import { FileInput } from "flowbite-react/components/FileInput";
 import { Label } from "flowbite-react/components/Label";
 import Link from "next/link";
@@ -27,9 +27,12 @@ export default function Home() {
     router.push('/messages')
 
     return (
-      <div>
-        <p>Not allowed</p>
-      </div>
+      <main className="flex h-screen justify-center">
+         <div className="flex flex-wrap items-center gap-2">
+          <Spinner aria-label="Small spinner example" size="sm" />
+          <p>Redirecting to messages</p>
+        </div>
+      </main>
     )
   }
 

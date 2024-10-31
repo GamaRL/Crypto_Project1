@@ -11,8 +11,10 @@ export default function Component() {
   return (
     <Sidebar className="h-screen w-1/4">
       <Link href={'/'} passHref legacyBehavior>
-        <Sidebar.Logo href="#" img="/images/live-chat.png" imgAlt="--">
-          Connected Users
+        <Sidebar.Logo href="#" img="/images/live-chat.png" imgAlt="--" color="dark">
+          <h1 className="text-gray-700 dark:text-white">
+            Connected Users
+          </h1>
         </Sidebar.Logo>
       </Link>
       <Sidebar.Items>
