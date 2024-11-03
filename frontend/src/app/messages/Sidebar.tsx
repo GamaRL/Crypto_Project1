@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useContext } from "react";
 import { HiUser } from "react-icons/hi";
 
+// Component that shows the connected users on the app 
 export default function Component() {
   const {connectedUsers, credentials} = useContext(AppContext)
   return (
