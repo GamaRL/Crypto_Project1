@@ -79,6 +79,20 @@ public class SocketModule {
     };
   }
 
+  private DataListener<PublicKeyMessage> onResponsePublicKey() {
+
+    return (client, data, ackSender) -> {
+      SocketIOClient receiver = server.getClient(UUID.fromString(data.getSessionId()));
+
+      var response = PublicKeyResponse.builder()
+        .publicKey(data.getPublicKey())
+        .sessionId(client.getSessionId().toString())
+        .build();
+
+      receiver.sendEvent("response_public_key", response);
+    };
+  }
+
   private DataListener<RequestSecretSessionKey> onSendSecretSessionKey() {
 
     return (client, data, ackSender) -> {
@@ -102,20 +116,6 @@ public class SocketModule {
       log.info("{}", message);
 
       receiver.sendEvent("receive_message", message);
-    };
-  }
-
-  private DataListener<PublicKeyMessage> onResponsePublicKey() {
-
-    return (client, data, ackSender) -> {
-      SocketIOClient receiver = server.getClient(UUID.fromString(data.getSessionId()));
-
-      var response = PublicKeyResponse.builder()
-        .publicKey(data.getPublicKey())
-        .sessionId(client.getSessionId().toString())
-        .build();
-
-      receiver.sendEvent("response_public_key", response);
     };
   }
 

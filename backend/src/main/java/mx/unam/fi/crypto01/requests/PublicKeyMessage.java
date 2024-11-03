@@ -1,5 +1,4 @@
-package mx.unam.fi.crypto01.requests; //package, organización lógica de paquetes
-/*Importación de la biblioteca lombok utilizada en Java, para eliminar código repetitivo */
+package mx.unam.fi.crypto01.requests;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Builder /*Genera un patrón Builder, el cual crea instancias de PublicKeyMessage  */
 @AllArgsConstructor /*Genera un constructor de clase, acepta un argumento por cada campo de la clase */
 @NoArgsConstructor/*Genera un constructor sin argumentos */
-/*Definición de la clase, contiene 2 atributos 
+/**
+ * Definición de la clase, contiene 2 atributos 
  * @sessionID identificador de sesión
  * @publicKey almacena la llave pública
  */
