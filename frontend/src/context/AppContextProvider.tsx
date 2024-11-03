@@ -76,8 +76,6 @@ const AppContextProvider : FC<AppContextProviderProps> = (props) => {
     keys: null,
   });
 
-  console.log(SOCKET_BASE_URL);
-
   useEffect(() => {
 
     if (credentials.username === '')
@@ -93,16 +91,15 @@ const AppContextProvider : FC<AppContextProviderProps> = (props) => {
 
 
     s.on("connect", () => {
-      console.log("connected")
+      console.log("Succesfully connected!")
 
       s.emit('show_connections', {}, (response: { username: string, sessionId: string }[]) => {
-        console.log(response)
         setConnectedUsers(response)
       })
     })
 
     s.on("connect_error", (err: Error) => {
-      console.log("connection error due to...")
+      console.error("connection error due to...")
       console.error(err)
     });
 
@@ -126,10 +123,8 @@ const AppContextProvider : FC<AppContextProviderProps> = (props) => {
 
     s.on("response_public_key", async (data: { sessionId: string, publicKey: string }) => {
       const key = await importPublicKey(fromPEM(data.publicKey))
-      console.log(key)
+      console.log(data.publicKey);    // Log
       setCryptoKeys(prevCryptoKeys => ({ ...prevCryptoKeys, [data.sessionId]: key }))
-      console.log("Crypto keys")
-      console.log(cryptoKeys)
     })
 
 
@@ -143,8 +138,6 @@ const AppContextProvider : FC<AppContextProviderProps> = (props) => {
   useEffect(() => {
 
     if (socket === null) {
-      console.log("saliendo");
-      
 
       return
     }
@@ -154,9 +147,10 @@ const AppContextProvider : FC<AppContextProviderProps> = (props) => {
 
     socket.on("receive_secret_session_key", async (data: { sessionId: string, key: string }) => {
       if (credentials.keys?.decryptsPrivateKey) {
+        const before = {secret: data.key}   // Log
         const secret = await decryptSecret(data.key, credentials.keys.decryptsPrivateKey)
-        console.log(secret);
-        console.log(sessionKeys);
+        const decrypted = {secret}          // Log
+        console.table({before, decrypted}); // Log
         setSessionKeys(prevSessionKeys => ({ ...prevSessionKeys, [data.sessionId]: secret }))
       }
     })
@@ -173,11 +167,16 @@ const AppContextProvider : FC<AppContextProviderProps> = (props) => {
 
         const decryptedMessage = await decryptMessage(data.content, symmetricKey);
 
+        const before = {message: data.content, signature: data.signature} // Log
+
         if (await verifyMessage(data.signature, decryptedMessage, userKeys.verifyPublicKey)) {
           data.content = decryptedMessage;
         } else {
           data.content = "[This message is dangerous]";
         }
+
+        const decrypted = {message: data.content} // Log
+        console.table({before, decrypted}); // Log
 
         setSessionMessages(prevSessionMessages => ({
           ...prevSessionMessages,

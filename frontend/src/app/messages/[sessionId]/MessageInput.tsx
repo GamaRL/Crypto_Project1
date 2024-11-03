@@ -29,16 +29,25 @@ export default function MessageInput(props: {sessionId: string}) {
       const messages = sessionMessages.hasOwnProperty(props.sessionId) ? sessionMessages[props.sessionId as keyof typeof sessionMessages] as unknown as Message[] : [];
       const symmetricKey = await generateSymmetricKeyFromPassword(sessionKey);
 
+      const now = new Date();
+
 
       const message: Message = {
         receiver: props.sessionId,
         sender: socket?.id || 'yo',
         content: await encryptMessage(messageContent, symmetricKey),
         signature: await signMessage(messageContent, credentials.keys.signPrivateKey),
-        date: '2024-05-03',
+        date: `${now.getDate()}/${now.getMonth()}/${now.getFullYear()} at ${now.getHours()}:${now.getSeconds()}`,
       }
 
       socket?.emit('send_message', message)
+
+      const before = {message: messageContent} // Log
+      const encrypted = {
+        message: message.content,
+        signature: message.signature
+      }                                        // Log
+      console.table({before, encrypted});      // Log
 
       message.content = messageContent
 
@@ -49,7 +58,6 @@ export default function MessageInput(props: {sessionId: string}) {
 
       setMessage('')
     }
-    
   }
 
   return (

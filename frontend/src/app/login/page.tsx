@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, FormEvent, useContext, useState } from "react";
 
-export default function Home() {
+export default function Login() {
 
   const [privKey, setPrivKey] = useState<string>('')
   const [pubKey, setPubKey] = useState<string>('')
@@ -71,7 +71,6 @@ export default function Home() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setPrivKey(e.target?.result as string); // Set the file content to state
-        console.log(e.target?.result as string);
       };
       reader.readAsText(privFile); // Read the file as text
     }

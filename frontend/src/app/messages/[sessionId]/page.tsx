@@ -48,7 +48,7 @@ export default function Home() {
             <main>
               <div>
                 <h1 className="text-xl text-bold my-10">
-                  Chat con el usuario {userData?.username}
+                  Chat with user: {userData?.username}
                 </h1>
               </div>
               <RequestKeyAlert sessionId={params.sessionId}/>

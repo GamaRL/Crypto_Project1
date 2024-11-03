@@ -29,7 +29,7 @@ export default function RequestKey(props: {sessionId: string}) {
 
   const { socket, cryptoKeys, credentials } = useContext(AppContext);
 
-  const handleButton : MouseEventHandler<HTMLButtonElement> = async () => {
+  const handleButtonClick : MouseEventHandler<HTMLButtonElement> = async () => {
     socket?.emit('request_public_key', props.sessionId)
     
     if (credentials.keys) {
@@ -38,13 +38,12 @@ export default function RequestKey(props: {sessionId: string}) {
       socket?.emit("response_public_key", { sessionId: props.sessionId, publicKey: key })
 
     }
-    
   }
 
   if (!cryptoKeys.hasOwnProperty(props.sessionId))
     return (
       <div>
-        <Alert color="warning" icon={HiInformationCircle} additionalContent={<AlertContent onClick={handleButton}/>}>
+        <Alert color="warning" icon={HiInformationCircle} additionalContent={<AlertContent onClick={handleButtonClick}/>}>
           <span className="font-medium">You don&apos;t have his user public key!</span>
         </Alert>
       </div>

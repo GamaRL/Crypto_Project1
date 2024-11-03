@@ -27,14 +27,17 @@ export default function SecretInput(props: { sessionId: string }) {
     if (cryptoKeys.hasOwnProperty(props.sessionId)) {
 
       const keys = cryptoKeys[props.sessionId as keyof typeof cryptoKeys] as unknown as Pick<SignAndEncryptKeyCollection, "encryptPublicKey" | "verifyPublicKey">
-      const message = await encryptSecret(secret, keys.encryptPublicKey);
+      const encryptedSecret = await encryptSecret(secret, keys.encryptPublicKey);
       socket?.emit('send_secret_session_key', {
-        key: message,
+        key: encryptedSecret,
         sessionId: props.sessionId
       });
 
+      const before = {secret}             // Log
+      const encrypted = {secret: encryptedSecret}    // Log
+      console.table({before, encrypted});                // Log
+
       setSessionKeys({ ...sessionKeys, [props.sessionId]: secret })
-      console.log(message);
     }
   }
 

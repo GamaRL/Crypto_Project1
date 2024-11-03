@@ -27,12 +27,10 @@ export default function KeyGeneration() {
     setDisabled(event.target.value.length < 8);
   }
 
-  const onGenerate = () => {
-    exportKeys(password)
-    .then(keys => {
-      downloadFile('public.pem', keys.privateKeyPEM)
-      downloadFile('private.key', keys.publicKeyPEM)
-    })
+  const onGenerate = async () => {
+    const keys = await exportKeys(password)
+    downloadFile('public.pem', keys.publicKeyPEM)
+    downloadFile('private.key', keys.privateKeyPEM)
   }
 
   return (

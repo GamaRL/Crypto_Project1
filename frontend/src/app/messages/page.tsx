@@ -11,8 +11,6 @@ export default function Home() {
   const { credentials } = useContext(AppContext);
   const router = useRouter()
 
-  console.log(credentials);
-
 
   if (credentials.username === '' || credentials.keys === null) {
     router.push('/login')
@@ -33,10 +31,7 @@ export default function Home() {
         <div>
           <DefaultBanner />
         </div>
-
-
       </div>
-
     </main>
   );
 }

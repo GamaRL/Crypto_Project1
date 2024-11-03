@@ -1,4 +1,4 @@
-package mx.unam.fi.crypto01.socket;
+package mx.unam.fi.crypto01.socketio;
 
 import java.util.stream.Collectors;
 import java.util.UUID;
@@ -22,12 +22,12 @@ import mx.unam.fi.crypto01.service.UserService;
 
 @Component
 @Slf4j
-public class SocketModule {
+public class SocketIOModule {
 
   private final SocketIOServer server;
   private final UserService userService;
 
-  public SocketModule(SocketIOServer server, UserService userService) {
+  public SocketIOModule(SocketIOServer server, UserService userService) {
     this.server = server;
     this.userService = userService;
     server.addConnectListener(this.onConnected());
@@ -44,6 +44,7 @@ public class SocketModule {
       String name = String.join("", client.getHandshakeData().getUrlParams().get("username"));
       String sessionId = client.getSessionId().toString();
       userService.addUser(sessionId, client);
+
       log.info("User connected: {}", name);
 
       var newConnectedUser = ConnectedUser.builder()
@@ -61,6 +62,7 @@ public class SocketModule {
     return client -> {
       String sessionId = client.getSessionId().toString();
       userService.removeUser(sessionId);
+
       log.info("User disconnected: {}", client.getSessionId());
 
       for (var c : server.getAllClients()) {
@@ -75,6 +77,11 @@ public class SocketModule {
       SocketIOClient sender = client;
       SocketIOClient receiver = server.getClient(UUID.fromString(data));
 
+      String requesterUsername = client.getHandshakeData().getUrlParams().get("username").get(0);
+      String receiverUsername = receiver.getHandshakeData().getUrlParams().get("username").get(0);
+
+      log.info("User {} request his public key to {}", requesterUsername, receiverUsername);
+
       receiver.sendEvent("request_public_key", sender.getSessionId().toString());
     };
   }
@@ -83,6 +90,11 @@ public class SocketModule {
 
     return (client, data, ackSender) -> {
       SocketIOClient receiver = server.getClient(UUID.fromString(data.getSessionId()));
+
+      String requesterUsername = receiver.getHandshakeData().getUrlParams().get("username").get(0);
+      String receiverUsername = client.getHandshakeData().getUrlParams().get("username").get(0);
+
+      log.info("User {} respond his public key to {}", receiverUsername, requesterUsername);
 
       var response = PublicKeyResponse.builder()
         .publicKey(data.getPublicKey())
@@ -97,6 +109,11 @@ public class SocketModule {
 
     return (client, data, ackSender) -> {
       SocketIOClient receiver = server.getClient(UUID.fromString(data.getSessionId()));
+
+      String requesterUsername = client.getHandshakeData().getUrlParams().get("username").get(0);
+      String receiverUsername = receiver.getHandshakeData().getUrlParams().get("username").get(0);
+
+      log.info("User {} send the secret to {}: {}", requesterUsername, receiverUsername, data.getKey());
 
       var sendSecretKey = SendSecretSessionKey.builder()
         .key(data.getKey())
@@ -113,7 +130,11 @@ public class SocketModule {
       var sessionId = UUID.fromString(message.getReceiver());
       SocketIOClient receiver = server.getClient(sessionId);
 
-      log.info("{}", message);
+      String requesterUsername = client.getHandshakeData().getUrlParams().get("username").get(0);
+      String receiverUsername = receiver.getHandshakeData().getUrlParams().get("username").get(0);
+
+      log.info("User {} send a message to {}: {} (signature: {})",
+        requesterUsername, receiverUsername, message.getContent(), message.getSignature());
 
       receiver.sendEvent("receive_message", message);
     };

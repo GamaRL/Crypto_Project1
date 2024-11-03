@@ -1,6 +1,5 @@
 import { decryptSecret, encryptSecret } from "./encryptionService";
 import { generateKeyPair, generateSymmetricKeyFromPassword } from "./keyGenerationService";
-import { signMessage, verifyMessage } from "./signService";
 import { fromPEM, toPEM } from "./utilities";
 
 interface KeyPairResponse {
@@ -128,7 +127,7 @@ export async function importPublicKey(keyBuffer: ArrayBuffer): Promise<Pick<Sign
         name: "RSA-OAEP",
         hash: "SHA-256",
       },
-      false,   // Extractable (whether the key can be exported)
+      true,   // Extractable (whether the key can be exported)
       ["encrypt"] // Key usages
     ),
     verifyPublicKey: await window.crypto.subtle.importKey(
@@ -138,7 +137,7 @@ export async function importPublicKey(keyBuffer: ArrayBuffer): Promise<Pick<Sign
         name: "RSA-PSS",
         hash: "SHA-256",
       },
-      false,   // Extractable (whether the key can be exported)
+      true,   // Extractable (whether the key can be exported)
       ["verify"] // Key usages
     )
   }
