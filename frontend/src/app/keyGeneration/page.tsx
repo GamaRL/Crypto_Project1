@@ -6,6 +6,7 @@ import { Label } from "flowbite-react/components/Label";
 import Link from "next/link";
 import { ChangeEvent, useState } from "react";
 
+// Key generaion, allows users to generate a RSA key and then download it 
 export default function KeyGeneration() {
 
   const [password, setPassword] = useState<string>('');
@@ -22,17 +23,20 @@ export default function KeyGeneration() {
     URL.revokeObjectURL(url);
   }
 
+  //  Handles the user changes on the password 
   const onChange = (event : ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
-    setDisabled(event.target.value.length < 8);
+    setDisabled(event.target.value.length < 8); // Enables button when the password is >=8 characters
   }
 
+  // Generates RSA keys based on the entered password and downloads the file
   const onGenerate = async () => {
     const keys = await exportKeys(password)
     downloadFile('public.pem', keys.publicKeyPEM)
     downloadFile('private.key', keys.privateKeyPEM)
   }
-
+  
+  // WEB Design of the component
   return (
     <main className="flex flex-col items-center justify-center h-screen">
       <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
