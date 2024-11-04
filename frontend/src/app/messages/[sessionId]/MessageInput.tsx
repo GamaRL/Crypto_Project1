@@ -31,13 +31,20 @@ export default function MessageInput(props: {sessionId: string}) {
 
       const now = new Date();
 
+  
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+      const year = now.getFullYear();
+
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
 
       const message: Message = {
         receiver: props.sessionId,
         sender: socket?.id || 'yo',
         content: await encryptMessage(messageContent, symmetricKey),
         signature: await signMessage(messageContent, credentials.keys.signPrivateKey),
-        date: `${now.getDate()}/${now.getMonth()}/${now.getFullYear()} at ${now.getHours()}:${now.getSeconds()}`,
+        date: `${day}/${month}/${year} at ${hours}:${minutes}`,
       }
 
       socket?.emit('send_message', message)
