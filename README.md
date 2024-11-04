@@ -31,7 +31,7 @@ https://docs.docker.com/compose/install/linux/#install-using-the-repository
 
 ## Ejecución del programa
 
-*Nota: se requiere abrir una terminal y cambiarse al directorio de este repositorio (justo arriba de `frontend/` y `backend/`)*.
+***Nota:** se requiere abrir una terminal y cambiarse al directorio de este repositorio (justo arriba de `frontend/` y `backend/`)*.
 
 Para poder ejecutar la aplicación, es necesario ejecutar las siguientes instrucciones:
 
